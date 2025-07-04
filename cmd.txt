@@ -1,0 +1,19 @@
+
+python3 job.py   
+  --runner=DataflowRunner   
+  --project=healthmonitoringsystem-464616   
+  --region=us-west1   
+  --input_batch=gs://healthmont/hospital_data_analysis.csv   
+  --input_subscription=projects/healthmonitoringsystem-464616/subscriptions/healthmonot   
+  --output_batch_bq=healthmonitoringsystem-464616.healthmono.batch_patient_info   
+  --output_stream_bq=healthmonitoringsystem-464616.healthmono.stream_patient_vitals   
+  --temp_location=gs://dataflow-staging-us-west1-4aa6fc7e3c4eecda00ab27e2428b2c56/temp   
+  --staging_location=gs://dataflow-staging-us-west1-4aa6fc7e3c4eecda00ab27e2428b2c56/staging   
+  --job_name=separate-tables-stream-batch
+
+
+
+
+GCS_TO_SPANNER:
+--- STEP THE CLOUD IN LOCAL cloud auth login
+--- its access then run the cmd 

@@ -1,0 +1,101 @@
+CREATE OR REPLACE TABLE `healthmonitoringsystem-464616.healthmono.joined_patient_records2` AS
+SELECT
+  b.Patient_ID,
+  b.Age,
+  b.Gender,
+  b.Condition,
+  b.Procedure,
+  b.Cost,
+  b.Length_of_Stay,
+  b.Readmission,
+  b.Outcome,
+  b.Satisfaction,
+  s.Temperature_C,
+  SAFE_CAST(SPLIT(s.Blood_Pressure, '/')[OFFSET(0)] AS INT64) AS Systolic,
+  SAFE_CAST(SPLIT(s.Blood_Pressure, '/')[OFFSET(1)] AS INT64) AS Diastolic,
+  s.Heart_Rate,
+  s.event_timestamp
+FROM
+  `healthmonitoringsystem-464616.healthmono.batch_patient_info` AS b
+JOIN
+  `healthmonitoringsystem-464616.healthmono.stream_patient_vitals` AS s
+ON
+  b.Patient_ID = s.Patient_ID;
+
+
+
+-----------------------------------------------------------------------
+
+
+CREATE OR REPLACE MODEL `healthmono.readmission_model`
+OPTIONS(
+  model_type = 'logistic_reg',
+  input_label_cols = ['Outcome'],
+  auto_class_weights = TRUE,
+  data_split_method = 'AUTO_SPLIT'
+) AS
+SELECT
+  Age,
+  Gender,
+  Condition,
+  Procedure,
+  Cost,
+  Length_of_Stay,
+  Outcome,
+  Satisfaction,
+  systolic,
+  diastolic,
+  Heart_Rate,
+  Temperature_C,
+  Readmission
+FROM `healthmonitoringsystem-464616.healthmono.joined_patient_records2`
+WHERE Outcome IS NOT NULL;
+
+
+
+-----------------------------------------------------------------------
+
+SELECT *
+FROM ML.PREDICT(
+  MODEL `healthmonitoringsystem-464616.healthmono.outcome_model`,
+  (
+    SELECT *
+    FROM `healthmonitoringsystem-464616.healthmono.joined_patient_records2`
+    LIMIT 5
+  )
+);
+
+
+
+------------------------------------------------------------------------
+
+
+SELECT
+  Patient_ID,
+  predicted_Outcome,
+  probs.label AS class_label,
+  probs.prob AS class_probability
+FROM
+  ML.PREDICT(
+    MODEL `healthmonitoringsystem-464616.healthmono.outcome_model`,
+    (
+      SELECT
+        Patient_ID,
+        Age,
+        Gender,
+        Condition,
+        Procedure,
+        Cost,
+        Length_of_Stay,
+        Readmission,
+        Outcome,
+        Satisfaction,
+        Temperature_C,
+        Systolic,
+        Diastolic,
+        Heart_Rate
+      FROM
+        `healthmonitoringsystem-464616.healthmono.joined_patient_records2`
+    )
+  ), UNNEST(predicted_Outcome_probs) AS probs;
+
