@@ -45,6 +45,9 @@ I chose Google Cloud Platform for its rich data ecosystem:
 
 ---
 
+# Architecture
+![Architecture](https://github.com/praveenreddy82472/tutorial_test/blob/main/Archi.jpg)
+
 ## The Journey — Lessons Learned and Obstacles Overcome
 
 ### Complexity in Joining Data
@@ -82,3 +85,8 @@ By the end of this project:
 
 ---
 
+![Spanner](https://github.com/praveenreddy82472/tutorial_test/blob/main/spanner.jpg)
+
+![Bigtable](https://github.com/praveenreddy82472/tutorial_test/blob/main/bigtable.jpg)
+
+![Dataflow](https://github.com/praveenreddy82472/tutorial_test/blob/main/job.jpg)
